@@ -1,1 +1,2 @@
 export const KITTEN_CLICKED = 'KITTEN_CLICKED';
+export const ADD_KITTEN_IMAGES = 'ADD_KITTEN_IMAGES';

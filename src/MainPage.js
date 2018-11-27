@@ -1,11 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import {StyleSheet, Text, View, FlatList, TouchableOpacity, TouchableWithoutFeedback} from 'react-native';
-import {clickedKitten} from "./actions/actions";
+import {addKittenImages} from "./actions/actions";
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { key } from './secret';
 import KittenComponent from "./KittenComponent";
+import PropTypes from "prop-types";
+
+const catNames = require('cat-names');
 
 const styles = StyleSheet.create({
   container: {
@@ -37,7 +40,7 @@ const styles = StyleSheet.create({
     width: 75,
     textAlign: 'center',
     alignItems: 'center',
-    backgroundColor: '#C18274',
+    backgroundColor: '#C28274',
     margin: 10
   },
   buttonText: {
@@ -47,46 +50,31 @@ const styles = StyleSheet.create({
   }
 });
 
-class StartPage extends React.Component {
+class MainPage extends React.Component {
   constructor(props){
     super(props);
 
     this.state = {
-      images: [],
       loading: false
     }
   }
-  handleLoading = number => {
-    let num = number;
+  handleLoading = num => {
     let data = [];
+    let numbers = [];
     this.setState({loading: true});
-    while(num !== 0) {
-      if(num - 25 >= 0) {
-        num -= 25;
-        axios.get(`https://api.thecatapi.com/v1/images/search?size=small&mime_types=jpg,png&limit=25`, {
-          headers: {
-            "x-api-key": key
-          }
-        }).then(response => {
-          response.data.forEach(item => {
-            data.push(item);
-          });
-          if(num === 0) this.setState({images: data, loading: false});
+
+    for (let i = 0; i < num; i++) {
+      let integer = Math.floor(Math.random() * 1500) + 100;
+      if (!numbers.includes(integer)) {
+        data.push({
+          url: `https://placekitten.com/${integer}/${integer}`,
+          name: catNames.random(),
         });
-      } else if (num !== 0) {
-        axios.get(`https://api.thecatapi.com/v1/images/search?size=small&mime_types=jpg,png&limit=${num}`, {
-          headers: {
-            "x-api-key": key
-          }
-        }).then(response => {
-          response.data.forEach(item => {
-            data.push(item);
-          });
-          this.setState({images: data, loading: false});
-        });
-        num = 0;
-      }
+        numbers.push(integer);
+      } else i -= 1;
     }
+    this.props.addKittenImages(data);
+    this.setState({loading: false});
   };
 
   render() {
@@ -105,14 +93,14 @@ class StartPage extends React.Component {
           </TouchableOpacity>
         </View>
         <Spinner visible={this.state.loading}/>
-        {this.state.images.length !== 0 ?
+        {this.props.kittenImages.length !== 0 ?
           <FlatList
             style={styles.flatList}
-            data={this.state.images}
-            keyExtractor={(image, index) => image.id + index}
+            data={this.props.kittenImages}
+            keyExtractor={(image, index) => image.url + index}
             renderItem={ ({item}) => {
               return (
-                  <KittenComponent key={item.id} url={item.url}/>
+                  <KittenComponent changePage={this.props.changePage} url={item.url} name={item.name}/>
               )
             }}
           />
@@ -121,8 +109,13 @@ class StartPage extends React.Component {
     );
   }
 }
+
+MainPage.propTypes = {
+  changePage: PropTypes.func.isRequired
+};
+
 const mapStateToProps = state => ({
-  kitten: state.kitten
+  kittenImages: state.kittenImages
 });
 
-export default connect(mapStateToProps, {clickedKitten})(StartPage);
+export default connect(mapStateToProps, {addKittenImages})(MainPage);
