@@ -1,0 +1,1 @@
+export const KITTEN_CLICKED = 'KITTEN_CLICKED';
