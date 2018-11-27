@@ -32,5 +32,3 @@ class App extends React.Component {
 }
 
 export default App;
-
-// set REACT_NATIVE_PACKAGER_HOSTNAME=192.168.0.102
