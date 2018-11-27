@@ -8,14 +8,12 @@ import KittenInfo from "./src/KittenInfo";
 class App extends React.Component {
   constructor(props){
     super(props);
-
     this.state = {
       page: 'main page'
     }
   }
 
   changePage = (page) => {
-    console.log('Changing page to ' + page);
     this.setState({page});
   };
 

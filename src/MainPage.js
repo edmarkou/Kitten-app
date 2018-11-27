@@ -1,6 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {StyleSheet, Text, View, FlatList, TouchableOpacity, TouchableWithoutFeedback} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  NetInfo,
+  Alert,
+  AsyncStorage,
+  TextInput
+} from 'react-native';
 import {addKittenImages} from "./actions/actions";
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -47,6 +57,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     color: '#fff'
+  },
+  textInput: {
+    height: 40,
+    width: 100,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginTop: 10,
+    textAlign: 'center'
   }
 });
 
@@ -55,7 +74,8 @@ class MainPage extends React.Component {
     super(props);
 
     this.state = {
-      loading: false
+      loading: false,
+      text: ''
     }
   }
 
@@ -96,6 +116,34 @@ class MainPage extends React.Component {
     }
   };
 
+  getImages = async () => {
+    let images = [];
+    try {
+      images = await AsyncStorage.getItem('images') || [];
+    } catch (error) {
+      console.log(error.message);
+    }
+    return images;
+  };
+
+  /*componentDidMount() {
+    this.props.addKittenImages(this.getImages());
+  }*/
+
+  componentWillMount() {
+    NetInfo.isConnected.fetch().then(isConnected => {
+      if (!isConnected) {
+        Alert.alert(
+          'No internet',
+          'Please connect to internet to use the app',
+          [
+            {text: 'OK'},
+          ],
+          { cancelable: false });
+      }
+    });
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -109,6 +157,16 @@ class MainPage extends React.Component {
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => this.handleLoading(100)}>
             <Text style={styles.buttonText}>100</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TextInput
+            style={styles.textInput}
+            onChangeText={(text) => this.setState({text})}
+            value={this.state.text}
+          />
+          <TouchableOpacity style={{...styles.button, width: 100}} onPress={() => this.handleLoading(parseInt(this.state.text))}>
+            <Text style={styles.buttonText}>Load</Text>
           </TouchableOpacity>
         </View>
         <Spinner visible={this.state.loading}/>
