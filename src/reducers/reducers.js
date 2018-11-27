@@ -1,3 +1,5 @@
+import {AsyncStorage} from 'react-native';
+
 import {ADD_KITTEN_IMAGES, KITTEN_CLICKED} from '../types/actionTypes';
 
 const initialState = {
@@ -15,6 +17,7 @@ export default function(state = initialState, action) {
         kittenClicked: !state.kittenClicked
       };
     case ADD_KITTEN_IMAGES:
+      //AsyncStorage.setItem('images', action.payload);
       return {
         ...state,
         kittenImages: action.payload
