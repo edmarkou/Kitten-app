@@ -1,14 +1,23 @@
-import { KITTEN_CLICKED } from '../types/actionTypes';
+import {ADD_KITTEN_IMAGES, KITTEN_CLICKED} from '../types/actionTypes';
 
 const initialState = {
-  kitten: 'meow'
+  kitten: null,
+  kittenClicked: false,
+  kittenImages: [],
 };
 
 export default function(state = initialState, action) {
   switch (action.type) {
     case KITTEN_CLICKED:
       return {
-        kitten: action.payload
+        ...state,
+        kitten: action.payload,
+        kittenClicked: !state.kittenClicked
+      };
+    case ADD_KITTEN_IMAGES:
+      return {
+        ...state,
+        kittenImages: action.payload
       };
     default:
       return state;
