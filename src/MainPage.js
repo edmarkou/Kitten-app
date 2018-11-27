@@ -58,23 +58,42 @@ class MainPage extends React.Component {
       loading: false
     }
   }
-  handleLoading = num => {
-    let data = [];
-    let numbers = [];
-    this.setState({loading: true});
 
-    for (let i = 0; i < num; i++) {
-      let integer = Math.floor(Math.random() * 1500) + 100;
-      if (!numbers.includes(integer)) {
-        data.push({
-          url: `https://placekitten.com/${integer}/${integer}`,
-          name: catNames.random(),
+  handleLoading = number => {
+    let num = number;
+    let data = [];
+    this.setState({loading: true});
+    while(num !== 0) {
+      if(num - 25 >= 0) {
+        num -= 25;
+        axios.get(`https://api.thecatapi.com/v1/images/search?size=small&mime_types=jpg,png&limit=25`, {
+          headers: {
+            "x-api-key": key
+          }
+        }).then(response => {
+          response.data.forEach(item => {
+            data.push({url: item.url, name: catNames.random()});
+          });
+          if(num === 0) {
+            this.props.addKittenImages(data);
+            this.setState({loading: false});
+          }
         });
-        numbers.push(integer);
-      } else i -= 1;
+      } else if (num !== 0) {
+        axios.get(`https://api.thecatapi.com/v1/images/search?size=small&mime_types=jpg,png&limit=${num}`, {
+          headers: {
+            "x-api-key": key
+          }
+        }).then(response => {
+          response.data.forEach(item => {
+            data.push({url: item.url, name: catNames.random()});
+          });
+          this.props.addKittenImages(data);
+          this.setState({loading: false});
+        });
+        num = 0;
+      }
     }
-    this.props.addKittenImages(data);
-    this.setState({loading: false});
   };
 
   render() {
@@ -97,11 +116,9 @@ class MainPage extends React.Component {
           <FlatList
             style={styles.flatList}
             data={this.props.kittenImages}
-            keyExtractor={(image, index) => image.url + index}
+            keyExtractor={(image, index) => image.url + image.name + index }
             renderItem={ ({item}) => {
-              return (
-                  <KittenComponent changePage={this.props.changePage} url={item.url} name={item.name}/>
-              )
+              return <KittenComponent changePage={this.props.changePage} url={item.url} name={item.name}/>
             }}
           />
           : null}
